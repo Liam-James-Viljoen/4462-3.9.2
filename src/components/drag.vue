@@ -12,11 +12,16 @@
             :disabled="dragDisabled"
           >
             <li
+              v-for="(element, index) in listOfListsStaged"
+              :key="element.order"
               role="listitem"
               class="list-group-item"
-              v-for="element in listOfListsStaged"
-              :key="element.order"
-           
+              :id="'item_' + element.order"
+              tabindex="0"
+              @focus="SetSelectedLineStaging(index)"
+              @keyup.up="moveUpStaging"
+              @keyup.down="moveDownStaging"
+              @keyup.right="moveRightStaging"
             >
               {{ element.text }} {{ element.order }}
             </li>
@@ -49,6 +54,7 @@
               @focus="SetSelectedLine(listIndex, innerIndex)"
               @keyup.up="moveUp"
               @keyup.down="moveDown"
+              @keyup.left="moveLeft"
             >
               {{ element.text }} {{ innerIndex }}
               <i v-if="element.correct == true">✔️ (Correct)</i>
@@ -97,6 +103,7 @@ export default {
       submit: false,
       answersRevealed: false,
       selectedLine: null,
+      selectedLineStaging: null,
       currentItem: null,
       currentList: null,
       lengthOfSections: [],
@@ -155,7 +162,7 @@ export default {
 
       this.listOfListsStaged = [...refinedArrayDisordered];
     },
-     moveUp: function() {
+    moveUp: function() {
       if (this.selectedLine === 0) {
         //console.log("already at top?");
         if (this.currentList === 0) {
@@ -163,13 +170,13 @@ export default {
         } else {
           if (this.listOfLists[this.currentList - 1].length === 0) {
             //console.log("The above list doesn't have anything in it");
-             this.listOfLists[this.currentList - 1][0] = this.listOfLists[
+            this.listOfLists[this.currentList - 1][0] = this.listOfLists[
               this.currentList
             ][this.selectedLine];
             this.listOfLists[this.currentList].splice(this.selectedLine, 1);
           } else {
             //console.log("The above list contains somthing");
-             this.listOfLists[this.currentList - 1].push(
+            this.listOfLists[this.currentList - 1].push(
               this.listOfLists[this.currentList].shift()
             );
           }
@@ -177,7 +184,7 @@ export default {
         }
       } else {
         //console.log("Not at the top of list (Move normally)");
-          let swapout = null;
+        let swapout = null;
         swapout = this.listOfLists[this.currentList][this.selectedLine - 1];
         this.listOfLists[this.currentList][
           this.selectedLine - 1
@@ -195,13 +202,13 @@ export default {
         } else {
           if (this.listOfLists[this.currentList + 1].length === 0) {
             //console.log("The below list doesn't have anything in it");
-             this.listOfLists[this.currentList + 1][0] = this.listOfLists[
+            this.listOfLists[this.currentList + 1][0] = this.listOfLists[
               this.currentList
             ][this.selectedLine];
             this.listOfLists[this.currentList].splice(this.selectedLine, 1);
           } else {
             //console.log("The below list contains somthing");
-             this.listOfLists[this.currentList + 1].unshift(
+            this.listOfLists[this.currentList + 1].unshift(
               this.listOfLists[this.currentList].pop()
             );
           }
@@ -209,7 +216,7 @@ export default {
         }
       } else {
         //console.log("Not at the bottom of list (Move normally)");
-         let swapout = null;
+        let swapout = null;
         swapout = this.listOfLists[this.currentList][this.selectedLine + 1];
         this.listOfLists[this.currentList][
           this.selectedLine + 1
@@ -217,6 +224,18 @@ export default {
         this.listOfLists[this.currentList][this.selectedLine] = swapout;
         this.$forceUpdate();
       }
+    },
+    moveLeft() {
+      this.listOfListsStaged.push(this.listOfLists[this.currentList].splice(this.selectedLine, 1)[0]);
+    },
+    moveUpStaging() {
+
+    },
+    moveDownStaging() {
+
+    },
+    moveRightStaging() {
+      this.listOfLists[0].push(this.listOfListsStaged.splice(this.selectedLineStaging, 1)[0]);
     },
     retryQuestion: function() {
       this.dragDisabled = false;
@@ -292,6 +311,9 @@ export default {
       this.selectedLine = innerIndex;
       this.currentList = listIndex;
       this.currentItem = this.listOfLists[this.currentList][this.selectedLine];
+    },
+    SetSelectedLineStaging(index) {
+      this.selectedLineStaging = index;
     },
     refineMappedArray(completeListOfStatements) {
       var refinedArray = [];
