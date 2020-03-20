@@ -43,7 +43,7 @@
               role="listitem"
               class="list-group-item"
               v-for="(element, innerIndex) in listOfLists[listIndex]"
-              :key="element.order"
+              :key="innerIndex"
               :id="'item_' + element.order"
               tabindex="0"
               @focus="SetSelectedLine(listIndex, innerIndex)"
@@ -155,30 +155,29 @@ export default {
 
       this.listOfListsStaged = [...refinedArrayDisordered];
     },
-    moveUp: function() {
-      //console.lcurrentList
+     moveUp: function() {
       if (this.selectedLine === 0) {
-        console.log("already at top?");
+        //console.log("already at top?");
         if (this.currentList === 0) {
-          //Do Nothing
-          console.log("top of top");
+          //console.log("Top of the Top(pops)");
         } else {
           if (this.listOfLists[this.currentList - 1].length === 0) {
-            //Moves Object
-            this.listOfLists[this.currentList - 1][0] = this.listOfLists[
+            //console.log("The above list doesn't have anything in it");
+             this.listOfLists[this.currentList - 1][0] = this.listOfLists[
               this.currentList
             ][this.selectedLine];
             this.listOfLists[this.currentList].splice(this.selectedLine, 1);
           } else {
-            this.listOfLists[this.currentList - 1].push(
+            //console.log("The above list contains somthing");
+             this.listOfLists[this.currentList - 1].push(
               this.listOfLists[this.currentList].shift()
             );
           }
-
           this.$forceUpdate();
         }
       } else {
-        let swapout = null;
+        //console.log("Not at the top of list (Move normally)");
+          let swapout = null;
         swapout = this.listOfLists[this.currentList][this.selectedLine - 1];
         this.listOfLists[this.currentList][
           this.selectedLine - 1
@@ -188,28 +187,29 @@ export default {
       }
     },
     moveDown: function() {
+      //console.log("down");
       if (this.selectedLine === this.listOfLists[this.currentList].length - 1) {
-        console.log("already at bottom?");
+        //console.log("already at bottom?");
         if (this.listOfLists.length - 1 === this.currentList) {
-          //Do Nothing
-          console.log("bottom of bottom");
+          //console.log("Bottom of the Bottom");
         } else {
           if (this.listOfLists[this.currentList + 1].length === 0) {
-            //Moves Object
-            this.listOfLists[this.currentList + 1][0] = this.listOfLists[
+            //console.log("The below list doesn't have anything in it");
+             this.listOfLists[this.currentList + 1][0] = this.listOfLists[
               this.currentList
             ][this.selectedLine];
             this.listOfLists[this.currentList].splice(this.selectedLine, 1);
           } else {
-            this.listOfLists[this.currentList + 1].unshift(
+            //console.log("The below list contains somthing");
+             this.listOfLists[this.currentList + 1].unshift(
               this.listOfLists[this.currentList].pop()
             );
           }
-
           this.$forceUpdate();
         }
       } else {
-        let swapout = null;
+        //console.log("Not at the bottom of list (Move normally)");
+         let swapout = null;
         swapout = this.listOfLists[this.currentList][this.selectedLine + 1];
         this.listOfLists[this.currentList][
           this.selectedLine + 1
