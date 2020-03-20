@@ -23,7 +23,7 @@
               @keyup.down="moveDownStaging"
               @keyup.right="moveRightStaging"
             >
-              {{ element.text }} {{ element.order }}
+              {{ element.text }}
             </li>
           </draggable>
         </div>
@@ -56,7 +56,7 @@
               @keyup.down="moveDown"
               @keyup.left="moveLeft"
             >
-              {{ element.text }} {{ innerIndex }}
+              {{ element.text }}
               <i v-if="element.correct == true">✔️ (Correct)</i>
               <i v-if="element.incorrect == true">❌ (Incorrect)</i>
             </li>
@@ -226,16 +226,16 @@ export default {
       }
     },
     moveLeft() {
-      this.listOfListsStaged.push(this.listOfLists[this.currentList].splice(this.selectedLine, 1)[0]);
+      this.listOfListsStaged.push(
+        this.listOfLists[this.currentList].splice(this.selectedLine, 1)[0]
+      );
     },
-    moveUpStaging() {
-
-    },
-    moveDownStaging() {
-
-    },
+    moveUpStaging() {},
+    moveDownStaging() {},
     moveRightStaging() {
-      this.listOfLists[0].push(this.listOfListsStaged.splice(this.selectedLineStaging, 1)[0]);
+      this.listOfLists[0].push(
+        this.listOfListsStaged.splice(this.selectedLineStaging, 1)[0]
+      );
     },
     retryQuestion: function() {
       this.dragDisabled = false;
@@ -306,6 +306,17 @@ export default {
           }
         }
       }
+    },
+    revealAnswers: function() {
+      this.dragDisabled = true;
+      this.answersRevealed = true;
+      //Deconstruct List
+      var completeListOfStatements = this.refineMappedArray(this.list);
+      //Split list up
+      var refinedArraySplit = this.splitArrayIntoChunks(
+        completeListOfStatements
+      );
+      this.listOfLists = refinedArraySplit;
     },
     SetSelectedLine: function(listIndex, innerIndex) {
       this.selectedLine = innerIndex;
