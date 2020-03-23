@@ -273,7 +273,7 @@ export default {
         this.listOfListsStaged.splice(this.selectedLineStaging, 1)[0]
       );
     },
-    retryQuestion: function() {
+    retryQuestion() {
       this.dragDisabled = false;
       this.attempts = this.attempts - 1; //Decrease num of attempts left
       this.submit = false; //Reset submit button
@@ -293,7 +293,7 @@ export default {
         }
       }
     },
-    submitAnswers: function() {
+    submitAnswers() {
       this.dragDisabled = true;
       this.submit = true; //Show retry button
       var i;
@@ -328,7 +328,7 @@ export default {
         }
       }
     },
-    revealAnswers: function() {
+    revealAnswers() {
       this.dragDisabled = true;
       this.answersRevealed = true;
 
@@ -340,7 +340,7 @@ export default {
         this.listOfLists[this.listOfListsStaged[i].group].push(this.listOfListsStaged.splice(i, 1)[0])
       }
     },
-    SetSelectedLine: function(listIndex, innerIndex) {
+    SetSelectedLine(listIndex, innerIndex) {
       this.selectedLine = innerIndex;
       this.currentList = listIndex;
       this.currentItem = this.listOfLists[this.currentList][this.selectedLine];
