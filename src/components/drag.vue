@@ -2,7 +2,7 @@
   <div class="row">
     <!-- Insert drag here -->
     <div class="activity-wrapper">
-      <div class="left-wrapper ">
+      <div class="left-wrapper"  v-if="answersRevealed == false">
         <div role="list" class="col sticky">
           <draggable
             aria-live="polite"
@@ -13,7 +13,7 @@
           >
             <li
               v-for="(element, index) in listOfListsStaged"
-              :key="element.order"
+              :key="index"
               role="listitem"
               class="list-group-item"
               :id="'item_' + element.order"
@@ -117,6 +117,16 @@ export default {
     this.setupLists();
     for (let i = 0; i < this.lengthOfSections.length; i++) {
       this.listOfLists.push([]);
+    }
+    var exampleAnswers = this.listOfListsStaged.filter(function(el) {
+      return el.example == true;
+    });
+    this.listOfListsStaged = this.listOfListsStaged.filter(function(el) {
+      return el.example == false;
+    });
+    for (let i = 0; i < exampleAnswers.length; i++) {
+      this.listOfCorrectAnswers.push(exampleAnswers[i]);
+      this.listOfLists[exampleAnswers[i].group].push(exampleAnswers[i]);
     }
     this.listHeadings = this.titles;
   },
@@ -230,8 +240,34 @@ export default {
         this.listOfLists[this.currentList].splice(this.selectedLine, 1)[0]
       );
     },
-    moveUpStaging() {},
-    moveDownStaging() {},
+    moveUpStaging() {
+      if (this.selectedLineStaging === 0) {
+        //console.log("already at top?");
+      } else {
+        //console.log("Not at the top of list (Move normally)");
+        let swapout = null;
+        swapout = this.listOfListsStaged[this.selectedLineStaging - 1];
+        this.listOfListsStaged[
+          this.selectedLineStaging - 1
+        ] = this.listOfListsStaged[this.selectedLineStaging];
+        this.listOfListsStaged[this.selectedLineStaging] = swapout;
+        this.$forceUpdate();
+      }
+    },
+    moveDownStaging() {
+      if (this.selectedLineStaging === this.listOfListsStaged.length - 1) {
+        //console.log("already at top?");
+      } else {
+        //console.log("Not at the bottom of list (Move normally)");
+        let swapout = null;
+        swapout = this.listOfListsStaged[this.selectedLineStaging + 1];
+        this.listOfListsStaged[
+          this.selectedLineStaging + 1
+        ] = this.listOfListsStaged[this.selectedLineStaging];
+        this.listOfListsStaged[this.selectedLineStaging] = swapout;
+        this.$forceUpdate();
+      }
+    },
     moveRightStaging() {
       this.listOfLists[0].push(
         this.listOfListsStaged.splice(this.selectedLineStaging, 1)[0]
@@ -242,32 +278,17 @@ export default {
       this.attempts = this.attempts - 1; //Decrease num of attempts left
       this.submit = false; //Reset submit button
 
-      //Move correct answers into place
       let i;
       let x;
 
-      //Reset listOfLists to empty arrays
-      this.listOfLists = [];
-      for (i = 0; i < this.lengthOfSections.length; i++) {
-        this.listOfLists.push([]);
-      }
-
-      //Reset listOfListsStaged
-      this.setupLists();
-
-      //Loop through listOfListsStaged and push correct answers back to listOfLists while cutting duplicate out of stageing list
-      for (i = 0; i < this.listOfListsStaged.length; i++) {
-        for (x = 0; x < this.listOfCorrectAnswers.length; x++) {
-          this.listOfCorrectAnswers[x].correct = true; //These ensure they show as correct asnwers even if the user does somthing weird
-          this.listOfCorrectAnswers[x].incorrect = false;
-          if (
-            this.listOfListsStaged[i].order ==
-            this.listOfCorrectAnswers[x].order
-          ) {
-            this.listOfLists[this.listOfListsStaged[i].group].push(
-              this.listOfCorrectAnswers[x]
-            );
-            this.listOfListsStaged.splice(i, 1);
+      //Moves incorrect answers back to staging
+      for (i = this.listOfLists.length - 1; i >= 0; i--) {
+        for (x = this.listOfLists[i].length - 1; x >= 0; x--) {
+          if (this.listOfLists[i][x].correct == true) {
+            //do nothing
+          } else {
+            this.listOfLists[i][x].incorrect = false;
+            this.listOfListsStaged.push(this.listOfLists[i].splice(x, 1)[0]);
           }
         }
       }
@@ -277,46 +298,47 @@ export default {
       this.submit = true; //Show retry button
       var i;
       var x;
-      var v;
-      var present = false;
+      //var v;
+      //var present = false;
 
-      for (i = 0; i < this.listOfLists.length; i++) {
-        for (x = 0; x < this.listOfLists[i].length; x++) {
-          present = false;
-          //Loop Current List
+      for (i = this.listOfLists.length - 1; i >= 0; i--) {
+        for (x = this.listOfLists[i].length - 1; x >= 0; x--) {
           if (this.listOfLists[i][x].group === i) {
             this.listOfLists[i][x].correct = true;
             this.listOfLists[i][x].incorrect = false;
-            for (v = 0; v < this.listOfCorrectAnswers.length; v++) {
-              //This loops stops the duplication of objects in "listOfCorrectAnswers"
-              if (
-                this.listOfLists[i][x].order ===
-                this.listOfCorrectAnswers[v].order
-              ) {
-                present = true;
-                break;
-              }
-            }
-            if (present === false) {
-              this.listOfCorrectAnswers.push(this.listOfLists[i][x]);
-            }
           } else {
-            this.listOfLists[i][x].correct = false;
-            this.listOfLists[i][x].incorrect = true;
+            if (this.listOfLists[i][x].correct == true) {
+              this.listOfLists[this.listOfLists[i][x].group].push(
+                this.listOfLists[i].splice(x, 1)[0]
+              );
+            } else {
+              this.listOfLists[i][x].correct = false;
+              this.listOfLists[i][x].incorrect = true;
+            }
           }
+        }
+      }
+
+      //Moves correct answers from staging to listOfLists
+      for (i = this.listOfListsStaged.length - 1; i >= 0; i--) {
+        if (this.listOfListsStaged[i].correct == true) {
+          this.listOfLists[this.listOfListsStaged[i].group].push(
+            this.listOfListsStaged.splice(i, 1)[0]
+          );
         }
       }
     },
     revealAnswers: function() {
       this.dragDisabled = true;
       this.answersRevealed = true;
-      //Deconstruct List
-      var completeListOfStatements = this.refineMappedArray(this.list);
-      //Split list up
-      var refinedArraySplit = this.splitArrayIntoChunks(
-        completeListOfStatements
-      );
-      this.listOfLists = refinedArraySplit;
+
+      let i;
+
+      for (i = this.listOfListsStaged.length - 1; i >= 0; i--) {
+        this.listOfListsStaged[i].correct = true;
+        this.listOfListsStaged[i].incorrect = false;
+        this.listOfLists[this.listOfListsStaged[i].group].push(this.listOfListsStaged.splice(i, 1)[0])
+      }
     },
     SetSelectedLine: function(listIndex, innerIndex) {
       this.selectedLine = innerIndex;
@@ -325,23 +347,39 @@ export default {
     },
     SetSelectedLineStaging(index) {
       this.selectedLineStaging = index;
+      this.currentItem = this.listOfListsStaged[index];
     },
     refineMappedArray(completeListOfStatements) {
       var refinedArray = [];
       var order = 0;
+      var listItem;
       this.lengthOfSections.length = 0;
       for (var i = 0; i < completeListOfStatements.length; i++) {
         this.lengthOfSections.push(completeListOfStatements[i].length);
         for (var x = 0; x < completeListOfStatements[i].length; x++) {
-          var listItem = {
-            correct: false,
-            incorrect: false,
-            group: i,
-            order: order,
-            text: completeListOfStatements[i][x].text
-          };
-          order += 1;
-          refinedArray.push(listItem);
+          if (completeListOfStatements[i][x].example == null) {
+            listItem = {
+              correct: false,
+              incorrect: false,
+              group: i,
+              order: order,
+              example: false,
+              text: completeListOfStatements[i][x].text
+            };
+            order += 1;
+            refinedArray.push(listItem);
+          } else {
+            listItem = {
+              correct: true,
+              incorrect: false,
+              group: i,
+              order: order,
+              example: completeListOfStatements[i][x].example,
+              text: completeListOfStatements[i][x].text
+            };
+            order += 1;
+            refinedArray.push(listItem);
+          }
         }
       }
       //console.log(refinedArray);
