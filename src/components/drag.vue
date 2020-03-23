@@ -98,7 +98,7 @@ export default {
   },
   data() {
     return {
-      attempts: 3,
+      attempts: 30,
       dragDisabled: false,
       submit: false,
       answersRevealed: false,
